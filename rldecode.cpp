@@ -7,27 +7,27 @@ using namespace std;
 
 string rldecode(ifstream& input){
 	string result;
-	unsigned char currentChar, nextChar;
+	unsigned int currentChar, nextChar;
 	// unsigned int count = 0;
 	unsigned int num[4];
-	unsigned char seg[4];
+	unsigned int seg[4];
 	unsigned int finalNum = 0;
 	nextChar = input.get();
-	int count = 1;
 	int length = 1;
 
 	while(!input.eof()){
+		// if(input.eof()){
+		// 	break;
+		// }
 		currentChar = nextChar;
 		// input >> currentChar;
-		if(input.eof()){
-			break;
-		}
+		
 		if((currentChar >> 7) & 1){
 			seg[0] = currentChar;
-
+			// cout << "seg[0]: " << seg[0] << endl;
 			for(int i = 1; i < 4; i++){
 				seg[i] = input.get();
-				if(input.eof()){
+				if(seg[i] == -1){
 					break;
 				}
 				if(!((seg[i] >> 7) & 1)){
@@ -36,16 +36,18 @@ string rldecode(ifstream& input){
 				length++;
 
 			}
+			// cout << length << endl;
 			for(int j = 0; j < length; j++){
 				num[j] = (seg[j] & 0x7F) << ((length - j - 1) * 7);
 				finalNum |= num[j];
 			}
 
 			result += "[" + to_string(finalNum) + "]";
-			finalNum = 0;
 			nextChar = seg[length];
+			finalNum = 0;
+			length = 1;
 		}else{
-			result += currentChar;
+			result += (unsigned char)currentChar;
 			nextChar = input.get();
 		}
 	}
