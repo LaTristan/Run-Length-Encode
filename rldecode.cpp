@@ -5,69 +5,137 @@ using namespace std;
 
 
 
-string rldecode(ifstream& input){
-	string result;
-	unsigned int currentChar, nextChar;
+void rldecode(ifstream& input){
+	// string result;
+	unsigned char currentChar, nextChar;
 	// unsigned int count = 0;
 	unsigned int num[4];
-	unsigned int seg[4];
-	unsigned int finalNum = 0;
-	nextChar = input.get();
+	unsigned char seg[4];
+	unsigned int totalNum = 0;
+	int nextOne = input.peek();
 	int length = 1;
 
-	while(!input.eof()){
-		// if(input.eof()){
-		// 	break;
-		// }
-		currentChar = nextChar;
-		// input >> currentChar;
-		
+	int next;
+	while(input.peek() != EOF){
+		currentChar = input.get();
 		if((currentChar >> 7) & 1){
 			seg[0] = currentChar;
-			// cout << "seg[0]: " << seg[0] << endl;
+			
 			for(int i = 1; i < 4; i++){
-				seg[i] = input.get();
-				if(seg[i] == -1){
+				nextOne = input.peek();
+				if(nextOne == EOF){
 					break;
 				}
-				if(!((seg[i] >> 7) & 1)){
-					break;
-				}
-				length++;
 
+				if((nextOne >> 7) & 1){
+					seg[i] = input.get();
+					length++;
+				}else{
+					break;
+				}
 			}
-			// cout << length << endl;
+
 			for(int j = 0; j < length; j++){
 				num[j] = (seg[j] & 0x7F) << ((length - j - 1) * 7);
-				finalNum |= num[j];
+				totalNum |= num[j];
 			}
-
-			result += "[" + to_string(finalNum) + "]";
-			nextChar = seg[length];
-			finalNum = 0;
+			cout << "[" << to_string(totalNum) << "]";
+			// result += "[" + to_string(totalNum) + "]";
+			totalNum = 0;
 			length = 1;
+			
+			
 		}else{
-			result += (unsigned char)currentChar;
-			nextChar = input.get();
+			cout << currentChar;
+			// result += currentChar;
+			nextOne = input.peek();
+
 		}
 	}
 
-
-	return result;
+	// return result;
 }
 
+void rldecode(ifstream& input, ofstream* ptrFileOutput){
+	unsigned char currentChar, nextChar;
+	unsigned int num[4];
+	unsigned char seg[4];
+	unsigned int totalNum = 0;
+	int nextOne = input.peek();
+	int length = 1;
 
+	unsigned char charPrint;
+	unsigned int number;
+
+	int next;
+	while(input.peek() != EOF){
+		currentChar = input.get();
+		if((currentChar >> 7) & 1){
+			seg[0] = currentChar;
+			if(seg[0] == '\n'){
+				break;
+			}else{
+				for(int i = 1; i < 4; i++){
+					nextOne = input.peek();
+					if(nextOne == EOF){
+						break;
+					}
+
+					if((nextOne >> 7) & 1){
+						seg[i] = input.get();
+						length++;
+					}else{
+						break;
+					}
+				}
+
+				for(int j = 0; j < length; j++){
+					num[j] = (seg[j] & 0x7F) << ((length - j - 1) * 7);
+					totalNum |= num[j];
+				}
+				// *ptrFileOutput <<  "[" << to_string(totalNum) << "]";
+				// totalNum = 0;
+				// length = 1;
+			}
+			// cout << totalNum << endl;
+			for(int k = 0; k < totalNum + 2; k++){
+				// cout << totalNum << endl;
+				*ptrFileOutput << charPrint;
+			}
+
+			totalNum = 0;
+			length = 1;
+			
+		}else{
+			// *ptrFileOutput << currentChar;
+			charPrint = currentChar;
+			// cout << charPrint;
+			*ptrFileOutput << charPrint;
+			nextOne = input.peek();
+
+		}
+
+		
+	}
+}
 
 int main(int argc, char** argv){
 	ifstream fileInput(argv[1], ios::in | ios::binary);
+	ofstream fileOutput(argv[2], ios::out | ios::binary);
+	ofstream* ptrFileOutput = &fileOutput;
+
 
 	if(argc == 2){
 		string result;
-		result = rldecode(fileInput);
-		cout << result << endl;
+		rldecode(fileInput);
+		// cout << result << endl;
+	}else if(argc == 3){
+		rldecode(fileInput, ptrFileOutput);
 	}
+	
 
 	fileInput.close();
+	fileOutput.close();
 
 	return 0;
 }

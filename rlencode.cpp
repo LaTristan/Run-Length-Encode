@@ -4,8 +4,8 @@
 using namespace std;
 
 
-string rlencode(ifstream& input){
-	string result = "";
+void rlencode(ifstream& input){
+	// string result = "";
 	int count = 1;
 	char currentChar;
 	char nextChar;
@@ -18,18 +18,21 @@ string rlencode(ifstream& input){
 			count++;
 			currentChar = nextChar;
 		}else{
-			result += currentChar;
+			// result += currentChar;
+			cout << currentChar;
 			if(count > 2){
-				result += "[" + to_string(count - 2) + "]";
+				// result += "[" + to_string(count - 2) + "]";
+				cout << "[" << to_string(count - 3) << "]";
 			}else if (count == 2){
-				result += currentChar;
+				// result += currentChar;
+				cout << currentChar;
 			}
 			count = 1;
 			currentChar = nextChar;
 		}
 	}
 	
-	return result;
+	// return result;
 }
 
 void rlencode(ifstream& input, ofstream* ptrFileOutput){
@@ -51,9 +54,9 @@ void rlencode(ifstream& input, ofstream* ptrFileOutput){
 			// *ptrFileOutput.write((unsigned char)currentChar, sizeof(char));
 			*ptrFileOutput << currentChar;
 			if(count > 2){
-				num = count - 2;
+				num = count - 3;
 				// cout << "DEBUG1: " << num << endl;
-				if(num >= 1 && num <= 127){
+				if(num <= 127){
 					seg1 = (num & 0x7F) | 0x80;
 					*ptrFileOutput << seg1;
 				}else if(num > 127 && num <= (pow(2, 14) - 1)){
@@ -87,11 +90,11 @@ void rlencode(ifstream& input, ofstream* ptrFileOutput){
 
 
 int main(int argc, char **argv){
-	ifstream fileInput(argv[1], ios::in);
+	ifstream fileInput(argv[1], ios::in | ios::binary);
 	if(argc == 2){
 		string result;
-		result = rlencode(fileInput);
-		cout << result << endl;
+		rlencode(fileInput);
+		// cout << result << endl;
 	}else if(argc == 3){
 		char num = 28;
 		ofstream fileOutput(argv[2], ios::out | ios::binary);
@@ -100,6 +103,8 @@ int main(int argc, char **argv){
 		// fileOutput.write(&num, sizeof(char));
 		fileOutput.close();
 	}
+
+	fileInput.close();
 	
 
 	
